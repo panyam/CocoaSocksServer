@@ -41,7 +41,6 @@
 @property (nonatomic, readonly) short command;
 @property (nonatomic, readonly) unsigned char addressType;
 @property (nonatomic, readonly) short addressLen;
-@property (nonatomic, readonly) const unsigned char *addressBytes;
 @property (nonatomic, readonly) int port;
 
 - (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(SocksConfig *)aConfig;

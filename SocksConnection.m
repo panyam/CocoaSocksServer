@@ -73,11 +73,6 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     }
 }
 
-- (const unsigned char *)addressBytes
-{
-    return addressBytes;
-}
-
 /**
  * Override to specify which commands are supported.
  */
@@ -263,11 +258,11 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 {
     if (sock == endpointSocket)
     {
-        SocksLogInfo(@"Endpoint Socket: DisConnected");
+        SocksLogInfo(@"Endpoint Socket DisConnected");
     }
     else if (sock == clientSocket)
     {
-        SocksLogInfo(@"Client Socket: DisConnected");
+        SocksLogInfo(@"Client Socket DisConnected");
     }
 }
 
@@ -311,6 +306,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     case SOCKS_READING_VERSION:
         version = bytes[0];
         numAuthMethods = bytes[1];
+        SocksLogVerbose(@"Socks Version: %d, Num Auth Methods: %d", version, numAuthMethods);
         // now kick off reading of the methods
         [clientSocket readDataToLength:numAuthMethods
                           withTimeout:SOCKS_HEADER_READ_TIMEOUT
@@ -361,6 +357,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         break;
     case SOCKS_READING_CONN_DATA:
         // finally!  we can now send data we read here onto the endpoint
+        SocksLogVerbose(@"Forwarding %d bytes to endpoint.", [data length]);
         [endpointSocket writeData:data withTimeout:-1 tag:0];
 
         // and read more data 
@@ -533,10 +530,14 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 - (void)didReadDataOnEndpointSocket:(GCDAsyncSocket *)endpoint withData:(NSData *)data withTag:(long)tag
 {
     // then "foward" it directly to the client
+    SocksLogVerbose(@"Forwarding %d bytes to client.", [data length]);
     [clientSocket writeData:data withTimeout:-1 tag:0];
 
     // And read more data so we can forward it
     [endpointSocket readDataWithTimeout:-1 tag:SOCKS_READING_EP_CONN_DATA];
+
+    // And trigger more reading on the client as well
+    [self readConnectionData];
 }
 
 @end
