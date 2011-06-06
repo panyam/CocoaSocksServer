@@ -480,7 +480,6 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     response[3] = SOCKS_ADDRESS_TYPE_IPV4;
     if (reason == 0)
     {
-        // or set address type to ipv6 if endpoint connection is via ipv6
         NSData *epHost = [endpointSocket localAddress];
         if ([endpointSocket isIPv4])
         {
@@ -490,6 +489,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         }
         else
         {
+            response[3] = SOCKS_ADDRESS_TYPE_IPV6;
             struct sockaddr_in6 *addr = (struct sockaddr_in6 *)[epHost bytes];
             memcpy(response + 4, addr->sin6_addr.s6_addr, 16);
             responseLength += 16;
