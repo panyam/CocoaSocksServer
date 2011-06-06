@@ -1,4 +1,5 @@
 
+#include <netinet/in.h>
 #import "GCDAsyncSocket.h"
 #import "SocksServer.h"
 #import "SocksConfig.h"
@@ -244,11 +245,11 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     NSAssert(endpointSocket == sock, @"Endpoint socket is not same as connected socket");
     SocksLogVerbose(@"Socket: %p, Connected to host: %@ Port: %hu", sock, epHost, epPort);
 
+    // send the success response to the connection method request
+    [self sendRequestResponse:0];
+
     // Start reading from the endpoint
     [endpointSocket readDataWithTimeout:-1 tag:SOCKS_READING_EP_CONN_DATA];
-
-    // now start reading from client to forward to the endpoint
-    [self readConnectionData];
 }
 
 /**
@@ -349,9 +350,6 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
                    (bytes[addressLen + 1]);
             host = [[NSString alloc] initWithBytes:addressBytes length:addressLen encoding:NSASCIIStringEncoding];
         }
-
-        // send the "response" to the connection method request
-        [self sendRequestResponse:0];
 
         [self processConnectionRequest];
         break;
@@ -463,37 +461,46 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         }
         else
         {
-            // [self readConnectionData];
+            // do nothing here.. basically AFTER we have connected, send
+            // the response to the client
         }
     }
 }
 
 /**
- * Called to send an "invalid request" response back to the client.
- * This will also put the connection handler back into the "reading
- * request" state.
+ * Called after a connection to the endpoint is successful or has failed to
+ * notify the client of the response.
  */
 - (void)sendRequestResponse:(unsigned char)reason
 {
     char response[512] = { 0 };
-    int responseLength = 6;
+    int responseLength = 4;
     response[0] = version;
     response[1] = reason;
+    response[3] = SOCKS_ADDRESS_TYPE_IPV4;
     if (reason == 0)
     {
-        response[3] = addressType;
-        int start = 4;
-        if (addressType == SOCKS_ADDRESS_TYPE_DOMAIN)
+        // or set address type to ipv6 if endpoint connection is via ipv6
+        NSData *epHost = [endpointSocket localAddress];
+        if ([endpointSocket isIPv4])
         {
-            response[start++] = addressType;
-            responseLength++;
+            struct sockaddr_in *addr = (struct sockaddr_in *)[epHost bytes];
+            memcpy(response + 4, &(addr->sin_addr.s_addr), 4);
+            responseLength += 4;
         }
-        memcpy(response + start, addressBytes, addressLen);
-        responseLength += addressLen;
+        else
+        {
+            struct sockaddr_in6 *addr = (struct sockaddr_in6 *)[epHost bytes];
+            memcpy(response + 4, addr->sin6_addr.s6_addr, 16);
+            responseLength += 16;
+        }
+        int epPort = [endpointSocket localPort];
+        response[responseLength++] = (epPort >> 8) & 0xff;
+        response[responseLength++] = epPort & 0xff;
     }
     else
     {
-        response[3] = SOCKS_ADDRESS_TYPE_IPV4;
+        responseLength = 10;
 
         // go back to the "Reading request" state
         [self startReadingConnectionRequest];
@@ -503,6 +510,12 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
                                           length:responseLength]
                withTimeout:SOCKS_HEADER_WRITE_TIMEOUT
                        tag:-1];
+
+    if (reason == 0)
+    {
+        // now start reading from client to forward to the endpoint
+        [self readConnectionData];
+    }
 }
 
 /**
