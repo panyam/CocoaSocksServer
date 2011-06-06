@@ -355,7 +355,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         break;
     case SOCKS_READING_CONN_DATA:
         // finally!  we can now send data we read here onto the endpoint
-        SocksLogVerbose(@"Forwarding %d bytes to endpoint.", [data length]);
+        SocksLogVerbose(@"%3d bytes - Client -> Endpoint.", [data length]);
         [endpointSocket writeData:data withTimeout:-1 tag:0];
 
         // and read more data 
@@ -543,7 +543,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 - (void)didReadDataOnEndpointSocket:(GCDAsyncSocket *)endpoint withData:(NSData *)data withTag:(long)tag
 {
     // then "foward" it directly to the client
-    SocksLogVerbose(@"Forwarding %d bytes to client.", [data length]);
+    SocksLogVerbose(@"%3d bytes - Endpoint -> Client.", [data length]);
     [clientSocket writeData:data withTimeout:-1 tag:0];
 
     // And read more data so we can forward it
