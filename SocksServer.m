@@ -419,6 +419,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_INFO; // | SOCKS_LOG_FLAG_TRACE
         }
         [connections removeAllObjects];
         [connectionsLock unlock];
+        SocksLogInfo(@"%@: Stopped Socks Server");
 
         [pool release];
     });
