@@ -42,6 +42,12 @@
 @property (nonatomic, readonly) unsigned char addressType;
 @property (nonatomic, readonly) short addressLen;
 @property (nonatomic, readonly) int port;
+@property (nonatomic, readonly) NSData *clientAddress;
+@property (nonatomic, readonly) NSData *endpointAddress;
+@property (nonatomic, readonly) NSString *clientHost;
+@property (nonatomic, readonly) NSString *endpointHost;
+@property (nonatomic, readonly) NSUInteger clientPort;
+@property (nonatomic, readonly) NSUInteger endpointPort;
 
 - (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(SocksConfig *)aConfig;
 - (void)start;
@@ -50,6 +56,12 @@
 - (int)selectConnectionMethod;
 - (BOOL)isCommandSupported:(char)cmd;
 - (BOOL)isAddressTypeSupported:(char)addrType;
+- (NSData *)clientAddress;
+- (NSString *)clientHost;
+- (NSUInteger)clientPort;
+- (NSData *)endpointAddress;
+- (NSString *)endpointHost;
+- (NSUInteger)endpointPort;
 
 @end
 

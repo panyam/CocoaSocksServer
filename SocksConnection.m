@@ -94,6 +94,60 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     addrType == SOCKS_ADDRESS_TYPE_DOMAIN;
 }
 
+- (NSData *)clientAddress
+{
+    if (clientSocket == nil && [clientSocket isConnected])
+    {
+        return [clientSocket connectedAddress];
+    }
+    return nil;
+}
+
+- (NSString *)clientHost
+{
+    if (clientSocket == nil && [clientSocket isConnected])
+    {
+        return [clientSocket connectedHost];
+    }
+    return nil;
+}
+
+- (NSUInteger)clientPort
+{
+    if (clientSocket == nil && [clientSocket isConnected])
+    {
+        return [clientSocket connectedPort];
+    }
+    return 0;
+}
+
+- (NSData *)endpointAddress
+{
+    if (endpointSocket == nil && [endpointSocket isConnected])
+    {
+        return [endpointSocket connectedAddress];
+    }
+    return nil;
+}
+
+- (NSString *)endpointHost
+{
+    if (endpointSocket == nil && [endpointSocket isConnected])
+    {
+        return [endpointSocket connectedHost];
+    }
+    return nil;
+}
+
+- (NSUInteger)endpointPort
+{
+    if (endpointSocket == nil && [endpointSocket isConnected])
+    {
+        return [endpointSocket connectedPort];
+    }
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Init, Dealloc:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
