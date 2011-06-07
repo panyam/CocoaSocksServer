@@ -314,6 +314,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
                                   tag:SOCKS_READING_METHOD_LIST];
         break;
     case SOCKS_READING_METHOD_LIST:
+        SocksLogVerbose(@"Reading method list");
         for (int i = 0;i < numAuthMethods;i++)
             authMethods[i] = bytes[i];
         selectedMethod = [self selectConnectionMethod];
@@ -394,6 +395,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  */
 - (void)startReadingConnectionRequest
 {
+    SocksLogTrace();
     // why are we reading 5 bytes when we ony need 4?
     // because the 5th byte is the start of the dest address and if
     // address type (byte 3) is 3, then the 5th byte is the address
@@ -409,6 +411,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  */
 - (void)readConnectionRequestAddress:(const char *)bytes
 {
+    SocksLogTrace();
     char addressBytesLeft = 0;
     if (addressType == 1 || addressType == 4)   // IP V4 or V6
     {
@@ -447,10 +450,12 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  */
 - (void)processConnectionRequest
 {
+    SocksLogTrace();
     if (command == SOCKS_COMMAND_CONNECT)
     {
         // Use the same queue for endpoint connections as well
         // Later on after profiling we could break this up
+        SocksLogInfo(@"Connecting to %@ on Port: %d", host, port);
         endpointSocket = [[GCDAsyncSocket alloc] initWithDelegate:self
                                                     delegateQueue:connectionQueue];
 

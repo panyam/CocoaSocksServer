@@ -419,7 +419,6 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_INFO; // | SOCKS_LOG_FLAG_TRACE
         }
         [connections removeAllObjects];
         [connectionsLock unlock];
-        SocksLogInfo(@"%@: Stopped Socks Server");
 
         [pool release];
     });
@@ -454,6 +453,17 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_INFO; // | SOCKS_LOG_FLAG_TRACE
     [connectionsLock unlock];
 
     return result;
+}
+
+/**
+ * Returns a summary/detail about the connection at a given index.
+ */
+- (void)connectionAtIndex:(NSUInteger)index
+            sourceAddress:(NSString **)sourceAddress
+               sourcePort:(NSUInteger)sourcePort
+              destAddress:(NSString **)destAddress
+                 destPort:(NSUInteger)destPort
+{
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

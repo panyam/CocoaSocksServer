@@ -147,6 +147,14 @@
 - (BOOL)stop;
 - (BOOL)isRunning;
 
+/**
+ * Methods to get connection summary.
+ */
 - (NSUInteger)numberOfConnections;
+- (void)connectionAtIndex:(NSUInteger)index
+            sourceAddress:(NSString **)sourceAddress
+               sourcePort:(NSUInteger)sourcePort
+              destAddress:(NSString **)destAddress
+                 destPort:(NSUInteger)destPort;
 
 @end
