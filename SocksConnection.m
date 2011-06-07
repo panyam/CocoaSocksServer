@@ -60,6 +60,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 @synthesize addressType;
 @synthesize addressLen;
 @synthesize port;
+@synthesize endpointHostName = host;
 
 /**
  * This method is automatically called (courtesy of Cocoa) before the first instantiation of this class.
@@ -96,7 +97,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSData *)clientAddress
 {
-    if (clientSocket == nil && [clientSocket isConnected])
+    if (clientSocket != nil && [clientSocket isConnected])
     {
         return [clientSocket connectedAddress];
     }
@@ -105,7 +106,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSString *)clientHost
 {
-    if (clientSocket == nil && [clientSocket isConnected])
+    if (clientSocket != nil && [clientSocket isConnected])
     {
         return [clientSocket connectedHost];
     }
@@ -114,7 +115,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSUInteger)clientPort
 {
-    if (clientSocket == nil && [clientSocket isConnected])
+    if (clientSocket != nil && [clientSocket isConnected])
     {
         return [clientSocket connectedPort];
     }
@@ -123,7 +124,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSData *)endpointAddress
 {
-    if (endpointSocket == nil && [endpointSocket isConnected])
+    if (endpointSocket != nil && [endpointSocket isConnected])
     {
         return [endpointSocket connectedAddress];
     }
@@ -132,7 +133,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSString *)endpointHost
 {
-    if (endpointSocket == nil && [endpointSocket isConnected])
+    if (endpointSocket != nil && [endpointSocket isConnected])
     {
         return [endpointSocket connectedHost];
     }
@@ -141,7 +142,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
 - (NSUInteger)endpointPort
 {
-    if (endpointSocket == nil && [endpointSocket isConnected])
+    if (endpointSocket != nil && [endpointSocket isConnected])
     {
         return [endpointSocket connectedPort];
     }

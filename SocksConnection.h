@@ -45,6 +45,7 @@
 @property (nonatomic, readonly) NSData *clientAddress;
 @property (nonatomic, readonly) NSData *endpointAddress;
 @property (nonatomic, readonly) NSString *clientHost;
+@property (nonatomic, readonly) NSString *endpointHostName;
 @property (nonatomic, readonly) NSString *endpointHost;
 @property (nonatomic, readonly) NSUInteger clientPort;
 @property (nonatomic, readonly) NSUInteger endpointPort;
@@ -60,6 +61,7 @@
 - (NSString *)clientHost;
 - (NSUInteger)clientPort;
 - (NSData *)endpointAddress;
+- (NSString *)endpointHostName;
 - (NSString *)endpointHost;
 - (NSUInteger)endpointPort;
 
