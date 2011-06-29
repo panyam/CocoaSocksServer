@@ -42,16 +42,28 @@
     return [self addUser:username withPassword:password overrideExisting:NO];
 }
 
+/**
+ * Remove an existing user.
+ */
 -(void) removeUser:(NSString *)username
 {
+    [passwords removeObjectForKey:username];
 }
 
--(void) getPasswordForUser:(NSString *)username
+/**
+ * Get user password.
+ */
+-(NSString *) getPasswordForUser:(NSString *)username
 {
+    return [passwords objectForKey:username];
 }
 
+/**
+ * Sets a user password.
+ */
 -(void) setPasswordForUser:(NSString *)username withPassword:(NSString *)password
 {
+    [passwords setObject:password forKey:username];
 }
 
 @end

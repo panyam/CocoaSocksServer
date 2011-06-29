@@ -15,7 +15,7 @@
 -(BOOL)addUser:(NSString *)username withPassword:(NSString *)password overrideExisting:(BOOL)override;
 -(BOOL)addUser:(NSString *)username withPassword:(NSString *)password;
 -(void)removeUser:(NSString *)username;
--(void)getPasswordForUser:(NSString *)username;
+-(NSString *)getPasswordForUser:(NSString *)username;
 -(void)setPasswordForUser:(NSString *)username withPassword:(NSString *)password;
 
 @end
