@@ -52,6 +52,8 @@
 // The logging context can be extracted from the DDLogMessage from within the logging framework,
 // which gives loggers, formatters, and filters the ability to optionally process them differently.
 
+extern int socksLogLevel;
+
 #define SOCKS_LOG_CONTEXT 80
 
 // Configure log levels.
@@ -93,6 +95,9 @@
 #define SOCKS_LOG_ASYNC_TRACE   (YES && SOCKS_LOG_ASYNC_ENABLED)
 
 // Define logging primitives.
+
+#define SocksSetLogLevel(level)     { socksLogLevel = level }
+#define SocksGetLogLevel()          socksLogLevel
 
 #define SocksLogError(frmt, ...)    LOG_OBJC_MAYBE(SOCKS_LOG_ASYNC_ERROR,   socksLogLevel, SOCKS_LOG_FLAG_ERROR,  \
                                                   SOCKS_LOG_CONTEXT, frmt, ##__VA_ARGS__)

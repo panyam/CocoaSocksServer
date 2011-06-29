@@ -3,10 +3,6 @@
 #import "GCDAsyncSocket.h"
 #import "CocoaSocks.h"
 
-// Log levels: off, error, warn, info, verbose
-// Other flags: trace
-static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
-
 // Define chunk size used to read in data for responses
 // This is how much data will be read from disk into RAM at a time
 #if TARGET_OS_IPHONE
@@ -281,14 +277,14 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  */
 - (int)selectAuthMethod
 {
-    return 0;   // no auth required - YET
+    return 1;   // no auth required - YET
 }
 
 - (SocksAuthMethod *)createConnectionWithMethod:(int)method
 {
     if (method == 1)
     {
-        return [[SocksUPAuthMethod alloc] initWithPasswords:nil];
+        return [[SocksUPAuthMethod alloc] initWithConnection:self withPasswords:nil];
     }
     return nil;
 }
@@ -319,11 +315,11 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 {
     if (sock == endpointSocket)
     {
-        SocksLogInfo(@"Endpoint Socket DisConnected");
+        SocksLogInfo(@"Endpoint Socket [%p] Disconnected", sock);
     }
     else if (sock == clientSocket)
     {
-        SocksLogInfo(@"Client Socket DisConnected");
+        SocksLogInfo(@"Client Socket [%p] Disconnected", sock);
     }
 }
 
@@ -337,7 +333,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 {
     if (delegateToAuthMethod)
     {
-        [authMethod socket:sock didReadData:data withTag:tag];
+        [authMethod clientSocket:sock didReadData:data withTag:tag];
     }
 
     if (tag < 0)
@@ -381,7 +377,9 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     case SOCKS_READING_METHOD_LIST:
         SocksLogVerbose(@"Reading method list");
         for (int i = 0;i < numAuthMethods;i++)
+        {
             authMethods[i] = bytes[i];
+        }
         selectedMethod = [self selectAuthMethod];
         authMethod = [self createConnectionWithMethod:selectedMethod];
         [self sendSelectedMethodResponse];
@@ -448,11 +446,12 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         // it will be the first handler of IO on the sockets, once it has completed, 
         // it will hand control back to us.
         delegateToAuthMethod = YES;
-        [authMethod startAuthNegotiationForConnection:self withSocket:clientSocket];
+        [authMethod startAuthNegotiationWithClient:clientSocket];
     }
     else
     {
         // no auth method so treat as success and proceed with the connection
+        delegateToAuthMethod = NO;
         [self negotiationCompleted:YES];
     }
 }

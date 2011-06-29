@@ -4,10 +4,6 @@
 #import "GCDAsyncSocket.h"
 #import "SocksLogging.h"
 
-// Log levels: off, error, warn, info, verbose
-// Other flags: trace
-static const int socksLogLevel = SOCKS_LOG_LEVEL_INFO; // | SOCKS_LOG_FLAG_TRACE;
-
 @interface SocksServer (PrivateAPI)
 
 - (void)unpublishBonjour;
