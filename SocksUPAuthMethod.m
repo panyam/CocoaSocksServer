@@ -11,14 +11,11 @@
 
 @synthesize passwords;
 
--(id)initWithConnection:(SocksConnection *)connection
-{
-    return [self initWithConnection:connection withPasswords:nil];
-}
++(int)methodID { return 1; }
 
--(id)initWithConnection:(SocksConnection *)connection withPasswords:(PasswordManager *)passwords_
+-(id)initWithPasswords:(PasswordManager *)passwords_
 {
-    if ((self = [super initWithConnection:connection]))
+    if ((self = [super init]))
     {
         passwords = [passwords_ retain];
     }
@@ -31,9 +28,26 @@
     [super dealloc];
 }
 
--(int)methodID
+/**
+ * Handles the authentication negotiation.
+ * Override to do method specific authentication.
+ * Always call [theConnection negotiationCompleted:YES|NO] to end the auth
+ * negotiation with a success or failure.
+ */
+-(void)startAuthNegotiationForConnection:(SocksConnection *)theConnection 
+                              withSocket:(GCDAsyncSocket *)clientSocket
 {
-    return 1;
+}
+
+/**
+ * Called when data has arrived on the socket and when the AuthMethod is the 
+ * handler of the data rather than the connection itself.
+ */
+-(void)connection:(SocksConnection *)theConnection
+clientSocketocket:(GCDAsyncSocket *)sock 
+      didReadData:(NSData *)data 
+          withTag:(long)tag
+{
 }
 
 @end

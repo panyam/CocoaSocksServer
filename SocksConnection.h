@@ -14,6 +14,7 @@
 @interface SocksConnection : NSObject
 {
     SocksConfig *config;
+    BOOL delegateToAuthMethod;
     SocksAuthMethod *authMethod;
     dispatch_queue_t connectionQueue;
     GCDAsyncSocket *clientSocket;
@@ -66,6 +67,9 @@
 - (NSString *)endpointHostName;
 - (NSString *)endpointHost;
 - (NSUInteger)endpointPort;
+
+// Callbacks
+- (void)negotiationCompleted:(BOOL)succeeded;
 
 @end
 

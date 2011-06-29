@@ -1,11 +1,7 @@
 
 
 #import "GCDAsyncSocket.h"
-#import "SocksConfig.h"
-#import "SocksConstants.h"
-#import "SocksConnection.h"
-#import "SocksAuthMethod.h"
-#import "SocksLogging.h"
+#import "CocoaSocks.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -13,24 +9,30 @@
 
 @implementation SocksAuthMethod
 
--(id)initWithConnection:(SocksConnection *)connection
++(int)methodID { return 0; }
+
+/**
+ * Handles the authentication negotiation.
+ * Override to do method specific authentication.
+ * Always call [theConnection negotiationCompleted:YES|NO] to end the auth
+ * negotiation with a success or failure.
+ */
+-(void)startAuthNegotiationForConnection:(SocksConnection *)theConnection 
+                              withSocket:(GCDAsyncSocket *)clientSocket
 {
-    if ((self = [super init]))
-    {
-        theConnection = [connection retain];
-    }
-    return self;
+    [theConnection negotiationCompleted:YES];
 }
 
--(void)dealloc
+/**
+ * Called when data has arrived on the socket and when the AuthMethod is the 
+ * handler of the data rather than the connection itself.
+ */
+-(void)connection:(SocksConnection *)theConnection
+clientSocketocket:(GCDAsyncSocket *)sock 
+      didReadData:(NSData *)data 
+          withTag:(long)tag
 {
-    [theConnection release];
-    [super dealloc];
-}
-
--(int)methodID
-{
-    return 0;
+    [theConnection negotiationCompleted:YES];
 }
 
 @end

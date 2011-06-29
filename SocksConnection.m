@@ -20,7 +20,6 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 - (void)didReadDataOnEndpointSocket:(GCDAsyncSocket *)endpoint withData:(NSData *)data withTag:(long)tag;
 - (void)startReadingRequest;
 - (void)sendSelectedMethodResponse;
-- (void)negotiateAuthMethod;
 - (void)startReadingConnectionRequest;
 - (void)readConnectionRequestAddress:(const char *)bytes;
 - (void)sendRequestResponse:(unsigned char)reason;
@@ -289,7 +288,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 {
     if (method == 1)
     {
-        return [[SocksUPAuthMethod alloc] initWithConnection:self withPasswords:nil];
+        return [[SocksUPAuthMethod alloc] initWithPasswords:nil];
     }
     return nil;
 }
@@ -336,6 +335,11 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  */
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
+    if (delegateToAuthMethod)
+    {
+        [authMethod socket:sock didReadData:data withTag:tag];
+    }
+
     if (tag < 0)
     {
         // -ve tags here for "no action" commands on the async sockets.
@@ -437,19 +441,37 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     char bytes[2] = {version, selectedMethod};
     NSData *data = [NSData dataWithBytes:bytes length:2];
     [clientSocket writeData:data withTimeout:SOCKS_HEADER_WRITE_TIMEOUT tag:SOCKS_SENDING_METHOD];
-    [self negotiateAuthMethod];
+    
+    if (authMethod)
+    {
+        // authmethod found, so let it take over the connection
+        // it will be the first handler of IO on the sockets, once it has completed, 
+        // it will hand control back to us.
+        delegateToAuthMethod = YES;
+        [authMethod startAuthNegotiationForConnection:self withSocket:clientSocket];
+    }
+    else
+    {
+        // no auth method so treat as success and proceed with the connection
+        [self negotiationCompleted:YES];
+    }
 }
 
 /**
- * This handles the connection method specific negotiation like
- * authentication etc.
- * Override this (and didReadDataOnClientSocket) to do custom negotiation
- * (by way of injection) and then call [super negotiateAuthMethod].
+ * Called by the auth method after negotiations have completed successfully.
  */
-- (void)negotiateAuthMethod
+- (void)negotiationCompleted:(BOOL)succeeded
 {
-    // now read the actual connection request
-    [self startReadingConnectionRequest];
+    delegateToAuthMethod = NO;
+    if (succeeded)
+    {
+        [self startReadingConnectionRequest];
+    }
+    else
+    {
+        // close the connection
+        [self stop];
+    }
 }
 
 /**
