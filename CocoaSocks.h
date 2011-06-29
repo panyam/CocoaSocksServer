@@ -2,12 +2,14 @@
 #ifndef __COCOA__SOCKS__H__
 #define __COCOA__SOCKS__H__
 
-#include "PasswordManager.h"
-#include "SocksConfig.h"
-#include "SocksConnection.h"
-#include "SocksConstants.h"
-#include "SocksLogging.h"
-#include "SocksServer.h"
+#import "PasswordManager.h"
+#import "SocksConfig.h"
+#import "SocksConstants.h"
+#import "SocksLogging.h"
+#import "SocksServer.h"
+#import "SocksConnection.h"
+#import "SocksAuthMethod.h"
+#import "SocksUPAuthMethod.h"
 
 #endif
 

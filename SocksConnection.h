@@ -3,6 +3,7 @@
 @class GCDAsyncSocket;
 @class SocksServer;
 @class SocksConfig;
+@class SocksAuthMethod;
 
 #define SocksConnectionDidDieNotification  @"SocksConnectionDidDie"
 
@@ -13,6 +14,7 @@
 @interface SocksConnection : NSObject
 {
     SocksConfig *config;
+    SocksAuthMethod *authMethod;
     dispatch_queue_t connectionQueue;
     GCDAsyncSocket *clientSocket;
 
@@ -54,7 +56,7 @@
 - (void)start;
 - (void)stop;
 - (void)startConnection;
-- (int)selectConnectionMethod;
+- (int)selectAuthMethod;
 - (BOOL)isCommandSupported:(char)cmd;
 - (BOOL)isAddressTypeSupported:(char)addrType;
 - (NSData *)clientAddress;

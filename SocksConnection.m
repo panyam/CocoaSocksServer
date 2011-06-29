@@ -1,11 +1,7 @@
 
 #include <netinet/in.h>
 #import "GCDAsyncSocket.h"
-#import "SocksServer.h"
-#import "SocksConfig.h"
-#import "SocksConstants.h"
-#import "SocksConnection.h"
-#import "SocksLogging.h"
+#import "CocoaSocks.h"
 
 // Log levels: off, error, warn, info, verbose
 // Other flags: trace
@@ -24,7 +20,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 - (void)didReadDataOnEndpointSocket:(GCDAsyncSocket *)endpoint withData:(NSData *)data withTag:(long)tag;
 - (void)startReadingRequest;
 - (void)sendSelectedMethodResponse;
-- (void)negotiateConnectionMethod;
+- (void)negotiateAuthMethod;
 - (void)startReadingConnectionRequest;
 - (void)readConnectionRequestAddress:(const char *)bytes;
 - (void)sendRequestResponse:(unsigned char)reason;
@@ -204,6 +200,7 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
 
     dispatch_release(connectionQueue);
 
+    [authMethod release];
     [host release];
     [clientSocket setDelegate:nil delegateQueue:NULL];
     [clientSocket disconnect];
@@ -283,9 +280,18 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
  * appropritate method to be used for the connection.
  * Override this to change the connection/authentication method.
  */
-- (int)selectConnectionMethod
+- (int)selectAuthMethod
 {
     return 0;   // no auth required - YET
+}
+
+- (SocksAuthMethod *)createConnectionWithMethod:(int)method
+{
+    if (method == 1)
+    {
+        return [[SocksUPAuthMethod alloc] initWithConnection:self withPasswords:nil];
+    }
+    return nil;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -372,7 +378,8 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
         SocksLogVerbose(@"Reading method list");
         for (int i = 0;i < numAuthMethods;i++)
             authMethods[i] = bytes[i];
-        selectedMethod = [self selectConnectionMethod];
+        selectedMethod = [self selectAuthMethod];
+        authMethod = [self createConnectionWithMethod:selectedMethod];
         [self sendSelectedMethodResponse];
         break;
     case SOCKS_READING_CONNREQUEST_VERSION:
@@ -430,16 +437,16 @@ static const int socksLogLevel = SOCKS_LOG_LEVEL_VERBOSE | SOCKS_LOG_FLAG_TRACE;
     char bytes[2] = {version, selectedMethod};
     NSData *data = [NSData dataWithBytes:bytes length:2];
     [clientSocket writeData:data withTimeout:SOCKS_HEADER_WRITE_TIMEOUT tag:SOCKS_SENDING_METHOD];
-    [self negotiateConnectionMethod];
+    [self negotiateAuthMethod];
 }
 
 /**
  * This handles the connection method specific negotiation like
  * authentication etc.
  * Override this (and didReadDataOnClientSocket) to do custom negotiation
- * (by way of injection) and then call [super negotiateConnectionMethod].
+ * (by way of injection) and then call [super negotiateAuthMethod].
  */
-- (void)negotiateConnectionMethod
+- (void)negotiateAuthMethod
 {
     // now read the actual connection request
     [self startReadingConnectionRequest];
