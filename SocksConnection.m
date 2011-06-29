@@ -277,12 +277,12 @@
  */
 - (int)selectAuthMethod
 {
-    return 1;   // no auth required - YET
+    return [SocksUPAuthMethod methodID];   // username/password auth
 }
 
 - (SocksAuthMethod *)createConnectionWithMethod:(int)method
 {
-    if (method == 1)
+    if (method == [SocksUPAuthMethod methodID])
     {
         return [[SocksUPAuthMethod alloc] initWithConnection:self withPasswords:nil];
     }
@@ -335,20 +335,22 @@
     {
         [authMethod clientSocket:sock didReadData:data withTag:tag];
     }
-
-    if (tag < 0)
+    else 
     {
-        // -ve tags here for "no action" commands on the async sockets.
-        return ;
-    }
-
-    if (sock == clientSocket)
-    {
-        [self didReadDataOnClientSocket:data withTag:tag];
-    }
-    else
-    {
-        [self didReadDataOnEndpointSocket:sock withData:data withTag:tag];
+        if (tag < 0)
+        {
+            // -ve tags here for "no action" commands on the async sockets.
+            return ;
+        }
+        
+        if (sock == clientSocket)
+        {
+            [self didReadDataOnClientSocket:data withTag:tag];
+        }
+        else
+        {
+            [self didReadDataOnEndpointSocket:sock withData:data withTag:tag];
+        }
     }
 }
 

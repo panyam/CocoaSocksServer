@@ -18,7 +18,7 @@
 
 @synthesize passwords;
 
-+(int)methodID { return 1; }
++(int)methodID { return 2; }
 
 -(id)initWithConnection:(SocksConnection *)connection withPasswords:(PasswordManager *)passwords_
 {
